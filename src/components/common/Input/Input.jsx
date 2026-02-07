@@ -8,6 +8,8 @@ const Input = ({
   placeholder,
   required = false,
   error,
+  min,
+  max,
   ...props
 }) => {
   return (
@@ -24,6 +26,8 @@ const Input = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        min={min}
+        max={max}
         {...props}
       />
       {error && <span className="error-message">{error}</span>}

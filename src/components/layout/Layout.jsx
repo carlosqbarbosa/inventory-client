@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import './Layout.css'
 
-const Layout = ({ children }) => {
+const Layout = ({ children }) => { 
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const toggleSidebar = () => {
@@ -14,9 +14,9 @@ const Layout = ({ children }) => {
     <div className="layout">
       <Navbar toggleSidebar={toggleSidebar} />
       <div className="layout-container">
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} />  
         <main className={`main-content ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
-          {children}
+          {children}  
         </main>
       </div>
     </div>

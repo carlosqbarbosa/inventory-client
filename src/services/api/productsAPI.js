@@ -22,22 +22,53 @@ export const deleteProduct = (id) => {
   return apiClient.delete(`${PRODUCTS_ENDPOINT}/${id}`)
 }
 
-// Product raw materials management
 export const getProductRawMaterials = (productId) => {
   return apiClient.get(`${PRODUCTS_ENDPOINT}/${productId}/raw-materials`)
 }
 
 export const addRawMaterialToProduct = (productId, rawMaterial) => {
-  return apiClient.post(`${PRODUCTS_ENDPOINT}/${productId}/raw-materials`, rawMaterial)
+  const payload = {
+    rawMaterialId: rawMaterial.rawMaterialId,
+    quantityRequired: rawMaterial.quantityRequired  
+  }
+  
+  console.log(' ADD API Call:', { productId, payload })
+  
+  return apiClient.post(`${PRODUCTS_ENDPOINT}/${productId}/raw-materials`, payload)
 }
 
 export const updateRawMaterialQuantity = (productId, rawMaterialId, quantity) => {
   return apiClient.put(
     `${PRODUCTS_ENDPOINT}/${productId}/raw-materials/${rawMaterialId}`,
-    { quantity }
+    { quantity }  
   )
 }
 
 export const removeRawMaterialFromProduct = (productId, rawMaterialId) => {
-  return apiClient.delete(`${PRODUCTS_ENDPOINT}/${productId}/raw-materials/${rawMaterialId}`)
+  const url = `${PRODUCTS_ENDPOINT}/${productId}/raw-materials/${rawMaterialId}`
+  
+  console.log(' DELETE API Call:', { 
+    productId, 
+    rawMaterialId,
+    url,
+    types: {
+      productId: typeof productId,
+      rawMaterialId: typeof rawMaterialId
+    }
+  })
+  
+  return apiClient.delete(url)
+    .then(response => {
+      console.log(' DELETE Response:', response)
+      return response
+    })
+    .catch(error => {
+      console.error(' DELETE Error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: url
+      })
+      throw error
+    })
 }

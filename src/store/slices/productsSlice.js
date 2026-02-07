@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import * as productsAPI from '../../services/api/productsAPI'
 
-
 export const fetchProducts = createAsyncThunk(
   'products/fetchAll',
   async () => {
@@ -44,17 +43,31 @@ export const deleteProduct = createAsyncThunk(
 
 export const addRawMaterialToProduct = createAsyncThunk(
   'products/addRawMaterial',
-  async ({ productId, rawMaterial }) => {
-    const response = await productsAPI.addRawMaterialToProduct(productId, rawMaterial)
-    return { productId, data: response.data }
+  async ({ productId, rawMaterial }, { rejectWithValue }) => {
+    try {
+      const response = await productsAPI.addRawMaterialToProduct(productId, rawMaterial)
+      return response.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message)
+    }
   }
 )
 
 export const removeRawMaterialFromProduct = createAsyncThunk(
   'products/removeRawMaterial',
-  async ({ productId, rawMaterialId }) => {
-    await productsAPI.removeRawMaterialFromProduct(productId, rawMaterialId)
-    return { productId, rawMaterialId }
+  async ({ productId, rawMaterialId }, { rejectWithValue }) => {
+    try {
+      await productsAPI.removeRawMaterialFromProduct(productId, rawMaterialId)
+      
+      const response = await productsAPI.getProductById(productId)
+      
+      console.log(' Product after delete:', response.data)
+      
+      return response.data 
+    } catch (error) {
+      console.error(' Remove failed:', error)
+      return rejectWithValue(error.response?.data || error.message)
+    }
   }
 )
 
@@ -62,7 +75,7 @@ export const updateRawMaterialQuantity = createAsyncThunk(
   'products/updateRawMaterialQuantity',
   async ({ productId, rawMaterialId, quantity }) => {
     const response = await productsAPI.updateRawMaterialQuantity(productId, rawMaterialId, quantity)
-    return { productId, data: response.data }
+    return response.data
   }
 )
 
@@ -84,7 +97,6 @@ const productsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true
         state.error = null
@@ -97,24 +109,84 @@ const productsSlice = createSlice({
         state.loading = false
         state.error = action.error.message
       })
-      
+
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true
+      })
       .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false
         state.selectedProduct = action.payload
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message
       })
       
       .addCase(createProduct.fulfilled, (state, action) => {
         state.items.push(action.payload)
       })
-      
+ 
       .addCase(updateProduct.fulfilled, (state, action) => {
         const index = state.items.findIndex(p => p.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
+        if (state.selectedProduct?.id === action.payload.id) {
+          state.selectedProduct = action.payload
+        }
       })
       
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.items = state.items.filter(p => p.id !== action.payload)
+      })
+
+      .addCase(addRawMaterialToProduct.fulfilled, (state, action) => {
+        const productId = action.payload.id
+        
+        const index = state.items.findIndex(p => p.id === productId)
+        if (index !== -1) {
+          state.items[index] = action.payload
+        }
+        
+        if (state.selectedProduct?.id === productId) {
+          state.selectedProduct = action.payload
+        }
+      })
+      
+      .addCase(removeRawMaterialFromProduct.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(removeRawMaterialFromProduct.fulfilled, (state, action) => {
+        state.loading = false
+        const product = action.payload 
+        
+        console.log(' Updated product from server:', product)
+        
+        const index = state.items.findIndex(p => p.id === product.id)
+        if (index !== -1) {
+          state.items[index] = product
+        }
+        
+        if (state.selectedProduct?.id === product.id) {
+          state.selectedProduct = product
+        }
+      })
+      .addCase(removeRawMaterialFromProduct.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || action.error.message
+      })
+      
+      .addCase(updateRawMaterialQuantity.fulfilled, (state, action) => {
+        const productId = action.payload.id
+        
+        const index = state.items.findIndex(p => p.id === productId)
+        if (index !== -1) {
+          state.items[index] = action.payload
+        }
+        
+        if (state.selectedProduct?.id === productId) {
+          state.selectedProduct = action.payload
+        }
       })
   },
 })
