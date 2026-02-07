@@ -81,33 +81,6 @@ Or with yarn:
 ```bash
 yarn install
 ```
-
----
-
-##  Configuration
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_API_URL=http://localhost:8080
-```
-
-### API Client Configuration
-
-The API client is configured in `src/services/api/client.js`:
-
-```javascript
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-```
-
 ---
 
 ##  Running the Application
