@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import * as productionPlanAPI from '../../services/api/productionPlanAPI'
 
-// Async thunks
 export const fetchProductionPlan = createAsyncThunk(
   'productionPlan/fetch',
   async () => {
